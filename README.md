@@ -66,4 +66,27 @@
 
 ---
 
+## Folder Structure Example
+```bash
+FoodDeliveryPlatform/
+├── main.go                    
+├── models/
+│   └── order.go
+│   └── restaurant.go
+│   └── menu.go
+├── repositories/
+│   └── rider_repository.go  
+│   └── order_repository.go 
+│   └── menu_repository.go  
+├── services/
+│   └── restaurant_service.go    
+│   └── rider_service.go    
+│   └── order_service.go    
+├── handlers/
+│   └── rider_handler.go     
+│   └── restaurant_handler.go    
+│   └── order_handler.go   
+```
+
 ## Step 3: Interface & Controller Contract
+
