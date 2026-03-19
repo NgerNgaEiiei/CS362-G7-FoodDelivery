@@ -273,3 +273,14 @@ FoodDeliveryPlatform/
   "message": "Order not found"
 }
 ```
+### Task 2: Interface
+### 1) CartService Interface
+``` Go
+{
+   type CartService interface {
+    AddItemToCart(customerID int, foodItemID int, quantity int, specialInstructions string) (Cart, error)
+    GetCartByCustomer(customerID int) (Cart, error)
+    UpdateCartItem(orderItemID int, quantity int, specialInstructions string) error
+    RemoveCartItem(orderItemID int) error
+}
+}
