@@ -293,3 +293,120 @@ FoodDeliveryPlatform/
     GetOrderDetail(orderID int) (Order, error)
 }
 ```
+
+### Task 3: Refinement (Entity Logic)
+### 1) Cart Entity Logic
+``` Go
+   type Cart struct {
+       CartID     int
+       CustomerID int
+       Items      []OrderItem
+       TotalPrice int
+   }
+   
+   // คำนวณราคารวมของตะกร้า
+   func (c *Cart) CalculateTotal() {
+       total := 0
+       for _, item := range c.Items {
+           total += item.CalculateSubTotal()
+       }
+       c.TotalPrice = total
+   }
+   
+   // ตรวจสอบว่าตะกร้าว่างหรือไม่
+   func (c *Cart) IsEmpty() bool {
+       return len(c.Items) == 0
+   }
+```
+- **CalculateTotal()** ใช้คำนวณราคารวมของสินค้าในตะกร้าจาก OrderItem ทั้งหมด เพื่อให้ได้ราคารวมล่าสุดก่อนแสดงผลหรือสร้างคำสั่งซื้อ
+- **IsEmpty()** ใช้ตรวจสอบว่าตะกร้าว่างหรือไม่ เพื่อป้องกันการสร้างคำสั่งซื้อจากตะกร้าที่ไม่มีสินค้า
+
+### 2) Order Entity Logic
+``` Go
+   type Order struct {
+       OrderID      int
+       OrderDate    string
+       CustomerID   int
+       RestaurantID int
+       Status       string
+       DeliveryAddr string
+       Items        []OrderItem
+       TotalPrice   int
+   }
+   
+   // คำนวณราคารวมของคำสั่งซื้อ
+   func (o *Order) CalculateTotal() {
+       total := 0
+       for _, item := range o.Items {
+           total += item.CalculateSubTotal()
+       }
+       o.TotalPrice = total
+   }
+   
+   // ตรวจสอบความถูกต้องของคำสั่งซื้อ
+   func (o *Order) IsValid() bool {
+       return o.CustomerID > 0 &&
+              o.RestaurantID > 0 &&
+              len(o.Items) > 0
+   }
+   
+```
+- **CalculateTotal()** ใช้คำนวณราคารวมของคำสั่งซื้อจากรายการอาหารทั้งหมดใน Order
+- **IsValid()** ใช้ตรวจสอบว่าข้อมูลคำสั่งซื้อครบถ้วน เช่น มีลูกค้า ร้านอาหาร และรายการอาหาร ก่อนบันทึกลงระบบ
+
+### 3) OrderItem Entity Logic
+``` Go
+   type OrderItem struct {
+       OrderItemID         int
+       FoodItemID          int
+       Quantity            int
+       UnitPrice           int
+       SpecialInstructions string
+   }
+   
+   // คำนวณราคาย่อยของแต่ละรายการ
+   func (oi *OrderItem) CalculateSubTotal() int {
+       return oi.UnitPrice * oi.Quantity
+   }
+   
+   // ตรวจสอบข้อมูลรายการอาหาร
+   func (oi *OrderItem) IsValid() bool {
+       return oi.Quantity > 0 && oi.UnitPrice >= 0
+   }
+```
+- **CalculateSubTotal()** ใช้คำนวณราคารวมย่อยของแต่ละรายการอาหารจากจำนวนและราคาต่อหน่วย
+- **IsValid()** ใช้ตรวจสอบความถูกต้องของข้อมูล เช่น จำนวนต้องมากกว่า 0 และราคาต้องไม่ติดลบ
+
+### 4) Customer Entity Logic
+``` Go
+   type Customer struct {
+       CustomerID      int
+       CustomerName    string
+       CustomerPhone   string
+       CustomerAddress string
+   }
+   
+   // ตรวจสอบข้อมูลลูกค้า
+   func (c *Customer) IsValid() bool {
+       return c.CustomerName != "" &&
+              c.CustomerPhone != "" &&
+              c.CustomerAddress != ""
+   }
+```
+- **IsValid()** ใช้ตรวจสอบว่าข้อมูลลูกค้ามีความครบถ้วน เช่น ชื่อ เบอร์โทร และที่อยู่ ก่อนนำไปใช้งานในระบบ
+
+### 5) Restaurant Entity Logic
+``` Go
+   type Restaurant struct {
+       RestaurantID       int
+       RestaurantName     string
+       RestaurantLocation string
+   }
+   
+   // ตรวจสอบข้อมูลร้านอาหาร
+   func (r *Restaurant) IsValid() bool {
+       return r.RestaurantName != "" &&
+              r.RestaurantLocation != ""
+   }
+```
+- **IsValid()** ใช้ตรวจสอบว่าข้อมูลร้านอาหารถูกต้อง เช่น มีชื่อร้านและตำแหน่งที่ตั้ง ก่อนใช้งานในระบบ
