@@ -29,7 +29,7 @@
 | orderDate | DATE | วันที่ที่ทำการสั่งอาหาร |
 | totalPrice | Integer | ราคารวมทั้งหมดในการสั่งซื้อ |
 | status | String | สถานะของการสั่งซื้อ |
-| DeliveryAddr | ที่อยู่จัดส่งของลูกค้า |
+| DeliveryAddr | Geo | ที่อยู่จัดส่งของลูกค้า |
 
 # OrderItem
 
