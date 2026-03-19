@@ -275,10 +275,18 @@ FoodDeliveryPlatform/
 ```
 ### Task 2: Interface
 ### 1) CartService Interface
+- **Description:** จัดการตะกร้าสินค้าของลูกค้า (เพิ่ม, แก้ไข, ลบ, ดูรายการ)
 ``` Go
    type CartService interface {
     AddItemToCart(customerID int, foodItemID int, quantity int, specialInstructions string) (Cart, error)
     GetCartByCustomer(customerID int) (Cart, error)
     UpdateCartItem(orderItemID int, quantity int, specialInstructions string) error
     RemoveCartItem(orderItemID int) error
+}
+### 2) Order Service Interface
+- **Description:** จัดการคำสั่งซื้อ (สร้างคำสั่งซื้อ และดูรายละเอียดคำสั่งซื้อ)
+``` Go
+   type OrderService interface {
+    CreateOrder(customerID int, restaurantID int, deliveryAddr string) (Order, error)
+    GetOrderDetail(orderID int) (Order, error)
 }
