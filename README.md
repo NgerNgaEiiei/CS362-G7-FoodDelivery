@@ -283,6 +283,8 @@ FoodDeliveryPlatform/
     UpdateCartItem(orderItemID int, quantity int, specialInstructions string) error
     RemoveCartItem(orderItemID int) error
 }
+```
+
 ### 2) Order Service Interface
 - **Description:** จัดการคำสั่งซื้อ (สร้างคำสั่งซื้อ และดูรายละเอียดคำสั่งซื้อ)
 ``` Go
@@ -290,3 +292,4 @@ FoodDeliveryPlatform/
     CreateOrder(customerID int, restaurantID int, deliveryAddr string) (Order, error)
     GetOrderDetail(orderID int) (Order, error)
 }
+```
