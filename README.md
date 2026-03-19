@@ -91,7 +91,7 @@ FoodDeliveryPlatform/
 ## Step 3: Interface & Controller Contract
 ### Task 1: Controller (API Specification)
 ### 1) Add Item to Cart
-- **Endpoint:** `POST /api/cart/items`
+- **Endpoint:** `POST /cart/items`
 - **Description:** เพิ่มรายการอาหารลงในตะกร้าของลูกค้า
 
 #### Request Body
@@ -128,7 +128,7 @@ FoodDeliveryPlatform/
 ---
 
 ### 2) Get Cart by Customer
-- **Endpoint:** `GET /api/cart/{customerId}`
+- **Endpoint:** `GET /cart/{customerId}`
 - **Description:** ดูรายการอาหารทั้งหมดในตะกร้าของลูกค้า
 
 #### Success Response
@@ -161,7 +161,7 @@ FoodDeliveryPlatform/
 ---
 
 ### 3) Update Cart Item
-- **Endpoint:** `PUT /api/cart/items/{orderItemId}`
+- **Endpoint:** `PUT /cart/items/{orderItemId}`
 - **Description:** แก้ไขจำนวนหรือรายละเอียดเพิ่มเติมของรายการอาหารในตะกร้า
 
 #### Request Body
@@ -189,7 +189,7 @@ FoodDeliveryPlatform/
 ---
 
 ### 4) Remove Cart Item
-- **Endpoint:** `DELETE /api/cart/items/{orderItemId}`
+- **Endpoint:** `DELETE /cart/items/{orderItemId}`
 - **Description:** ลบรายการอาหารออกจากตะกร้า
 
 #### Success Response
@@ -209,7 +209,7 @@ FoodDeliveryPlatform/
 ---
 
 ### 5) Create Order
-- **Endpoint:** `POST /api/orders`
+- **Endpoint:** `POST /orders`
 - **Description:** ยืนยันคำสั่งซื้อจากรายการในตะกร้าของลูกค้า
 
 #### Request Body
@@ -241,7 +241,7 @@ FoodDeliveryPlatform/
 ---
 
 ### 6) Get Order Detail
-- **Endpoint:** `GET /api/orders/{orderId}`
+- **Endpoint:** `GET /orders/{orderId}`
 - **Description:** ดูรายละเอียดคำสั่งซื้อที่ถูกสร้างแล้ว
 
 #### Success Response
