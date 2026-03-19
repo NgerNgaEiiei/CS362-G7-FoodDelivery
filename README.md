@@ -68,8 +68,7 @@
 
 ## Folder Structure Example
 ```bash
-FoodDeliveryPlatform/
-├── main.go                    
+FoodDeliveryPlatform/                   
 ├── models/
 │   └── order.go
 │   └── restaurant.go
@@ -85,7 +84,8 @@ FoodDeliveryPlatform/
 ├── handlers/
 │   └── rider_handler.go     
 │   └── restaurant_handler.go    
-│   └── order_handler.go   
+│   └── order_handler.go
+└── main.go   
 ```
 
 ## Step 3: Interface & Controller Contract
