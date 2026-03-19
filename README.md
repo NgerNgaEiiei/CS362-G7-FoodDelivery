@@ -2,7 +2,7 @@
 ## Step 1: Data Design
 1. Entities และ Attributes (ข้อมูลที่จำเป็น)
    
-Customer
+#Customer
 
 | Attribute | Type | Description | 
 |---|---|---|
@@ -11,7 +11,7 @@ Customer
 | CustomerPhone | VARCHAR | เบอร์โทรผู้ใช้ | 
 | CustomerAddress | String | ที่อยู่ผู้ใช้ | 
 
-Restaurant
+#Restaurant
 
 | Attribute | Type | Description | 
 |---|---|---|
@@ -21,6 +21,23 @@ Restaurant
 
 หมายเหตุ: Geo คือ ชนิดข้อมูลที่ใช้สำหรับเก็บ "พิกัดทางภูมิศาสตร์" เพื่อใช้คำนวณระยะทางจัดส่ง
 
+#Order
+
+| Attribute | Type | Description | 
+|---|---|---|
+| orderId | Integer |  id ของรายการอาหารนั้น ๆ |
+| orderDate | DATE | วันที่ที่ทำการสั่งอาหาร |
+| totalPrice | Integer | ราคารวมทั้งหมดในการสั่งซื้อ |
+| status | String | สถานะของการสั่งซื้อ |
+| DeliveryAddr | ที่อยู่จัดส่งของลูกค้า |
+
+#OrderItem
+
+| Attribute | Type | Description | 
+|---|---|---|
+| quantity | Integer | จำนวนของรายการอาหารที่สั่ง |
+| subTotal | Integer | ราคารวมย่อยของแต่ละรายการอาหาร |
+| specialInstructions | Text | รายละเอียดเพิ่มเติม |
 
 ---
 ## Step 2: Architectural Mapping
