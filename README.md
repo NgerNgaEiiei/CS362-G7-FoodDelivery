@@ -89,4 +89,187 @@ FoodDeliveryPlatform/
 ```
 
 ## Step 3: Interface & Controller Contract
+### Task 1: Controller (API Specification)
+### 1) Add Item to Cart
+- **Endpoint:** `POST /api/cart/items`
+- **Description:** เพิ่มรายการอาหารลงในตะกร้าของลูกค้า
 
+#### Request Body
+```json
+{
+  "customerId": 1,
+  "foodItemId": 101,
+  "quantity": 2,
+  "specialInstructions": "ไม่ใส่ผัก"
+}
+```
+
+#### Success Response
+```json
+{
+  "message": "Item added to cart successfully",
+  "cartId": 5001,
+  "item": {
+    "foodItemId": 101,
+    "quantity": 2,
+    "unitPrice": 60,
+    "specialInstructions": "ไม่ใส่ผัก"
+  }
+}
+```
+
+#### Error Response
+```json
+{
+  "message": "Food item not found"
+}
+```
+
+---
+
+### 2) Get Cart by Customer
+- **Endpoint:** `GET /api/cart/{customerId}`
+- **Description:** ดูรายการอาหารทั้งหมดในตะกร้าของลูกค้า
+
+#### Success Response
+```json
+{
+  "cartId": 5001,
+  "customerId": 1,
+  "items": [
+    {
+      "orderItemId": 1,
+      "foodItemId": 101,
+      "foodName": "ข้าวผัดกุ้ง",
+      "quantity": 2,
+      "unitPrice": 60,
+      "subTotal": 120,
+      "specialInstructions": "ไม่ใส่ผัก"
+    }
+  ],
+  "totalPrice": 120
+}
+```
+
+#### Error Response
+```json
+{
+  "message": "Cart not found"
+}
+```
+
+---
+
+### 3) Update Cart Item
+- **Endpoint:** `PUT /api/cart/items/{orderItemId}`
+- **Description:** แก้ไขจำนวนหรือรายละเอียดเพิ่มเติมของรายการอาหารในตะกร้า
+
+#### Request Body
+```json
+{
+  "quantity": 3,
+  "specialInstructions": "เผ็ดน้อย"
+}
+```
+
+#### Success Response
+```json
+{
+  "message": "Cart item updated successfully"
+}
+```
+
+#### Error Response
+```json
+{
+  "message": "Cart item not found"
+}
+```
+
+---
+
+### 4) Remove Cart Item
+- **Endpoint:** `DELETE /api/cart/items/{orderItemId}`
+- **Description:** ลบรายการอาหารออกจากตะกร้า
+
+#### Success Response
+```json
+{
+  "message": "Cart item removed successfully"
+}
+```
+
+#### Error Response
+```json
+{
+  "message": "Cart item not found"
+}
+```
+
+---
+
+### 5) Create Order
+- **Endpoint:** `POST /api/orders`
+- **Description:** ยืนยันคำสั่งซื้อจากรายการในตะกร้าของลูกค้า
+
+#### Request Body
+```json
+{
+  "customerId": 1,
+  "restaurantId": 10,
+  "deliveryAddr": "89/12 Khlong Luang, Pathum Thani"
+}
+```
+
+#### Success Response
+```json
+{
+  "message": "Order created successfully",
+  "orderId": 9001,
+  "status": "PENDING",
+  "totalPrice": 120
+}
+```
+
+#### Error Response
+```json
+{
+  "message": "Cart is empty"
+}
+```
+
+---
+
+### 6) Get Order Detail
+- **Endpoint:** `GET /api/orders/{orderId}`
+- **Description:** ดูรายละเอียดคำสั่งซื้อที่ถูกสร้างแล้ว
+
+#### Success Response
+```json
+{
+  "orderId": 9001,
+  "orderDate": "2026-03-19",
+  "customerId": 1,
+  "restaurantId": 10,
+  "status": "PENDING",
+  "deliveryAddr": "89/12 Khlong Luang, Pathum Thani",
+  "items": [
+    {
+      "orderItemId": 1,
+      "foodItemId": 101,
+      "foodName": "ข้าวผัดกุ้ง",
+      "quantity": 2,
+      "subTotal": 120,
+      "specialInstructions": "ไม่ใส่ผัก"
+    }
+  ],
+  "totalPrice": 120
+}
+```
+
+#### Error Response
+```json
+{
+  "message": "Order not found"
+}
+```
