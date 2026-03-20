@@ -46,23 +46,25 @@
 
 #### Controller Layer
 * `AuthController`
-* `DoctorController`
-* `AppointmentController`
-* `RecordController`
-   
+* `CustomerController`
+* `RestaurantController`
+* `OrderController`
+* `CartController`
+* `RiderController`
+    
 #### Service Layer
 * `AuthSerVice`
-* `DoctorService`
-* `AppointmentService`
-* `ZoomService`
-* `MedicalRecordService`
+* `OrderService`
+* `CartService`
+* `RestaurantService`
+* `DeliveryService`
    
 #### Repository Layer
-* `UserRepository`
-* `DoctorDetailRepository`
-* `TimeSlotRepository`
-* `AppointmentRepository`
-* `MedicalRecordRepository`
+* `CustomerRepository`
+* `OrderRepository`
+* `RestaurantRepository`
+* `CartRepository`
+* `MenuRepository`
 
 ---
 
