@@ -38,6 +38,12 @@
 | subTotal | Integer | ราคารวมย่อยของแต่ละรายการอาหาร | 
 | specialInstructions | Text | รายละเอียดเพิ่มเติม | 
 
+#### Cart
+| Attribute | Type | Description | 
+| :--- | :--- | :--- | 
+| CartID (PK) | Integer | รหัสตะกร้า | 
+| otalPrice | Integer | ราคารวมของตะกร้า | 
+
 ---
 
 ## Step 2: Architectural Mapping
