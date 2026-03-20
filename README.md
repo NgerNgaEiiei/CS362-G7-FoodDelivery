@@ -45,22 +45,16 @@
 ### Layered Architecture
 
 #### Controller Layer
-* `AuthController`
-* `CustomerController`
 * `RestaurantController`
 * `OrderController`
 * `CartController`
-* `RiderController`
     
 #### Service Layer
-* `AuthSerVice`
 * `OrderService`
 * `CartService`
 * `RestaurantService`
-* `DeliveryService`
    
 #### Repository Layer
-* `CustomerRepository`
 * `OrderRepository`
 * `RestaurantRepository`
 * `CartRepository`
