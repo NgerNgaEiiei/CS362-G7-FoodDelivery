@@ -11,7 +11,7 @@
 | CustomerID (PK) | Integer | รหัสผู้ใช้ | 
 | CustomerName | String | ชื่อผู้ใช้ | 
 | CustomerPhone | VARCHAR | เบอร์โทรผู้ใช้ | 
-| CustomerAddress | String | ที่อยู่ผู้ใช้ | 
+| CustomerAddress | Geo | ที่อยู่ผู้ใช้ | 
 
 #### Restaurant
 | Attribute | Type | Description | 
@@ -25,15 +25,20 @@
 #### Order
 | Attribute | Type | Description | 
 | :--- | :--- | :--- | 
-| orderId | Integer | id ของรายการอาหารนั้น ๆ | 
-| orderDate | DATE | วันที่ที่ทำการสั่งอาหาร | 
-| totalPrice | Integer | ราคารวมทั้งหมดในการสั่งซื้อ | 
+| OrderID (PK) | Integer | รหัสคำสั่งซื้อ | 
+| CustomerID (FK) | Integer | อ้างอิงถึงลูกค้า | 
+| RestaurantID (FK)| Integer | อ้างอิงถึงร้านอาหาร | 
+| OrderDate | DATE | วันที่ที่ทำการสั่งอาหาร | 
+| TotalPrice | Integer | ราคารวมทั้งหมดในการสั่งซื้อ | 
 | status | String | สถานะของการสั่งซื้อ | 
 | DeliveryAddr | Geo | ที่อยู่จัดส่งของลูกค้า | 
 
 #### OrderItem
 | Attribute | Type | Description | 
 | :--- | :--- | :--- | 
+| OrderItemID (PK) | Integer | id ของรายการอาหารนั้น ๆ | 
+| OrderID (FK) | Integer | อ้างอิงถึงคำสั่งซื้อ | 
+| FoodItemID (FK) | Integer | อ้างอิงเมนูอาหาร |
 | quantity | Integer | จำนวนของรายการอาหารที่สั่ง | 
 | subTotal | Integer | ราคารวมย่อยของแต่ละรายการอาหาร | 
 | specialInstructions | Text | รายละเอียดเพิ่มเติม | 
@@ -42,8 +47,20 @@
 | Attribute | Type | Description | 
 | :--- | :--- | :--- | 
 | CartID (PK) | Integer | รหัสตะกร้า | 
+| CustomerID (FK) | Integer | อ้างอิงถึงลูกค้าเจ้าของตะกร้า | 
+| RestaurantID (FK) | Integer | รหัสร้านอาหาร | 
 | TotalPrice | Integer | ราคารวมของตะกร้า | 
 | UpdateAt | Timestamp | เวลาที่ตะกร้าถูกอัปเดตล่าสุด |
+
+#### FoodItem (Menu)
+| Attribute | Type | Description |
+| :--- | :--- | :--- |
+| FoodItemID (PK) | Integer | รหัสอาหาร |
+| RestaurantID (FK) | Integer | อ้างอิงร้านอาหาร |
+| FoodName | String | ชื่อเมนู |
+| Price | Integer | ราคา |
+| Description | Text | รายละเอียด |
+| IsAvailable | Boolean | สถานะว่ายังขายอยู่ไหม |
 ---
 
 ## Step 2: Architectural Mapping
@@ -75,6 +92,7 @@ FoodDeliveryPlatform/
 │   └── order.go
 │   └── restaurant.go
 │   └── menu.go
+│   └── geo.go
 ├── repositories/
 │   └── rider_repository.go  
 │   └── order_repository.go 
@@ -219,7 +237,11 @@ FoodDeliveryPlatform/
 {
   "customerId": 1,
   "restaurantId": 10,
-  "deliveryAddr": "89/12 Khlong Luang, Pathum Thani"
+  "deliveryAddr": {
+     "lat": 14.064,
+     "lng": 100.608,
+     "address": "89/12 Khlong Luang, Pathum Thani"
+   }
 }
 ```
 
@@ -254,7 +276,11 @@ FoodDeliveryPlatform/
   "customerId": 1,
   "restaurantId": 10,
   "status": "PENDING",
-  "deliveryAddr": "89/12 Khlong Luang, Pathum Thani",
+  "deliveryAddr": {
+    "lat": 14.064,
+    "lng": 100.608,
+    "address": "89/12 Khlong Luang, Pathum Thani"
+  },
   "items": [
     {
       "orderItemId": 1,
@@ -291,7 +317,7 @@ FoodDeliveryPlatform/
 - **Description:** จัดการคำสั่งซื้อ (สร้างคำสั่งซื้อ และดูรายละเอียดคำสั่งซื้อ)
 ``` Go
    type OrderService interface {
-    CreateOrder(customerID int, restaurantID int, deliveryAddr string) (Order, error)
+    CreateOrder(customerID int, restaurantID int, deliveryAddr Geo) (Order, error)
     GetOrderDetail(orderID int) (Order, error)
 }
 ```
@@ -319,19 +345,46 @@ FoodDeliveryPlatform/
    func (c *Cart) IsEmpty() bool {
        return len(c.Items) == 0
    }
+   
+   // เพิ่มสินค้าในตะกร้า
+   func (c *Cart) AddItem(item OrderItem) {
+       c.Items = append(c.Items, item)
+       c.CalculateTotal()
+   }
+   
+   // ลบสินค้าออกจากตะกร้า
+   func (c *Cart) RemoveItem(orderItemID int) {
+       newItems := []OrderItem{}
+       for _, item := range c.Items {
+           if item.OrderItemID != orderItemID {
+               newItems = append(newItems, item)
+           }
+       }
+       c.Items = newItems
+       c.CalculateTotal()
+   }
+   
+   // ล้างตะกร้า
+   func (c *Cart) Clear() {
+       c.Items = []OrderItem{}
+       c.TotalPrice = 0
+   }
 ```
 - **CalculateTotal()** ใช้คำนวณราคารวมของสินค้าในตะกร้าจาก OrderItem ทั้งหมด เพื่อให้ได้ราคารวมล่าสุดก่อนแสดงผลหรือสร้างคำสั่งซื้อ
 - **IsEmpty()** ใช้ตรวจสอบว่าตะกร้าว่างหรือไม่ เพื่อป้องกันการสร้างคำสั่งซื้อจากตะกร้าที่ไม่มีสินค้า
+- **AddItem()** → เพิ่มสินค้า (logic หลักของ cart)
+- **RemoveItem()** → ลบสินค้า
+- **Clear()** → เคลียร์ตะกร้าหลัง checkout
 
 ### 2) Order Entity Logic
 ``` Go
    type Order struct {
        OrderID      int
-       OrderDate    string
+       OrderDate    time.Time
        CustomerID   int
        RestaurantID int
        Status       string
-       DeliveryAddr string
+       DeliveryAddr Geo
        Items        []OrderItem
        TotalPrice   int
    }
@@ -352,9 +405,21 @@ FoodDeliveryPlatform/
               len(o.Items) > 0
    }
    
+   // อัปเดตสถานะคำสั่งซื้อ
+   func (o *Order) UpdateStatus(status string) {
+       o.Status = status
+   }
+   
+   // ตรวจสอบว่าสั่งซื้อเสร็จสมบูรณ์หรือไม่
+   func (o *Order) IsCompleted() bool {
+       return o.Status == "COMPLETED"
+   }
+   
 ```
 - **CalculateTotal()** ใช้คำนวณราคารวมของคำสั่งซื้อจากรายการอาหารทั้งหมดใน Order
 - **IsValid()** ใช้ตรวจสอบว่าข้อมูลคำสั่งซื้อครบถ้วน เช่น มีลูกค้า ร้านอาหาร และรายการอาหาร ก่อนบันทึกลงระบบ
+- **UpdateStatus()** → เปลี่ยนสถานะ (สำคัญมากในระบบจริง)
+- **IsCompleted()** → ใช้เช็ค flow หลังส่งอาหาร
 
 ### 3) OrderItem Entity Logic
 ``` Go
@@ -385,14 +450,15 @@ FoodDeliveryPlatform/
        CustomerID      int
        CustomerName    string
        CustomerPhone   string
-       CustomerAddress string
+       CustomerAddress Geo
    }
    
    // ตรวจสอบข้อมูลลูกค้า
    func (c *Customer) IsValid() bool {
        return c.CustomerName != "" &&
               c.CustomerPhone != "" &&
-              c.CustomerAddress != ""
+              c.CustomerAddress.Lat != 0 &&
+              c.CustomerAddress.Lng != 0
    }
 ```
 - **IsValid()** ใช้ตรวจสอบว่าข้อมูลลูกค้ามีความครบถ้วน เช่น ชื่อ เบอร์โทร และที่อยู่ ก่อนนำไปใช้งานในระบบ
@@ -402,13 +468,14 @@ FoodDeliveryPlatform/
    type Restaurant struct {
        RestaurantID       int
        RestaurantName     string
-       RestaurantLocation string
+       RestaurantLocation Geo
    }
    
    // ตรวจสอบข้อมูลร้านอาหาร
    func (r *Restaurant) IsValid() bool {
        return r.RestaurantName != "" &&
-              r.RestaurantLocation != ""
+              r.RestaurantLocation.Lat != 0 &&
+              r.RestaurantLocation.Lng != 0
    }
 ```
 - **IsValid()** ใช้ตรวจสอบว่าข้อมูลร้านอาหารถูกต้อง เช่น มีชื่อร้านและตำแหน่งที่ตั้ง ก่อนใช้งานในระบบ
