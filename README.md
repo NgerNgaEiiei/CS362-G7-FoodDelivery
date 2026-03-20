@@ -42,8 +42,8 @@
 | Attribute | Type | Description | 
 | :--- | :--- | :--- | 
 | CartID (PK) | Integer | รหัสตะกร้า | 
-| otalPrice | Integer | ราคารวมของตะกร้า | 
-
+| TotalPrice | Integer | ราคารวมของตะกร้า | 
+| UpdateAt | Timestamp | เวลาที่ตะกร้าถูกอัปเดตล่าสุด |
 ---
 
 ## Step 2: Architectural Mapping
