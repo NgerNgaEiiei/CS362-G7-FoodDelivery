@@ -1,1 +1,0 @@
-// Type Order struct { ID string, Status string ... }
