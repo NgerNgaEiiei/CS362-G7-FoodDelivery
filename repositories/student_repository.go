@@ -34,3 +34,4 @@ func (r *Repository) GetAll() ([]model.Student, error) {
 	}
 	return students, nil
 }
+# Note: The actual implementation of GetAll should interact with the database to fetch student records. The above implementation is a placeholder for demonstration purposes.
