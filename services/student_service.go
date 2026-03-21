@@ -25,3 +25,5 @@ type Service interface {
 func (s *StudentService) GetStudents() ([]model.Student, error) {
 	return s.repo.GetAll()
 }
+
+//implement new serviceee 
