@@ -87,25 +87,30 @@
 
 ## Folder Structure Example
 ```bash
-FoodDeliveryPlatform/                   
-├── models/
-│   └── order.go
-│   └── restaurant.go
-│   └── menu.go
-│   └── geo.go
-├── repositories/
-│   └── rider_repository.go  
-│   └── order_repository.go 
-│   └── menu_repository.go  
+CS362-G7-FoodDelivery/
+├── controllers/
+│   ├── cart_controller.go
+│   └── order_controller.go
+│
 ├── services/
-│   └── restaurant_service.go    
-│   └── rider_service.go    
-│   └── order_service.go    
-├── handlers/
-│   └── rider_handler.go     
-│   └── restaurant_handler.go    
-│   └── order_handler.go
-└── main.go   
+│   ├── cart_service.go
+│   └── order_service.go
+│
+├── repositories/
+│   ├── cart_repository.go
+│   ├── order_repository.go
+│   └── fooditem_repository.go
+│
+├── models/
+│   ├── cart.go
+│   ├── order.go
+│   ├── order_item.go
+│   ├── customer.go
+│   ├── restaurant.go
+│   ├── food_item.go
+│   └── geo.go
+│
+├── README.md  
 ```
 
 ## Step 3: Interface & Controller Contract
