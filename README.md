@@ -30,7 +30,7 @@
 | RestaurantID (FK)| Integer | อ้างอิงถึงร้านอาหาร | 
 | OrderDate | DATE | วันที่ที่ทำการสั่งอาหาร | 
 | TotalPrice | Integer | ราคารวมทั้งหมดในการสั่งซื้อ | 
-| status | String | สถานะของการสั่งซื้อ | 
+| Status | String | สถานะของการสั่งซื้อ | 
 | DeliveryAddr | Geo | ที่อยู่จัดส่งของลูกค้า | 
 
 #### OrderItem
@@ -50,7 +50,7 @@
 | CustomerID (FK) | Integer | อ้างอิงถึงลูกค้าเจ้าของตะกร้า | 
 | RestaurantID (FK) | Integer | รหัสร้านอาหาร | 
 | TotalPrice | Integer | ราคารวมของตะกร้า | 
-| UpdateAt | Timestamp | เวลาที่ตะกร้าถูกอัปเดตล่าสุด |
+| UpdatedAt | Timestamp | เวลาที่ตะกร้าถูกอัปเดตล่าสุด |
 
 #### FoodItem (Menu)
 | Attribute | Type | Description |
@@ -333,8 +333,10 @@ CS362-G7-FoodDelivery/
    type Cart struct {
        CartID     int
        CustomerID int
+       RestaurantID int
        Items      []OrderItem
        TotalPrice int
+       UpdatedAt time.Time
    }
    
    // คำนวณราคารวมของตะกร้า
@@ -352,9 +354,15 @@ CS362-G7-FoodDelivery/
    }
    
    // เพิ่มสินค้าในตะกร้า
-   func (c *Cart) AddItem(item OrderItem) {
+   func (c *Cart) AddItem(item OrderItem, restaurantID int) error {
+       if c.RestaurantID != 0 && c.RestaurantID != restaurantID {
+           return errors.New("cannot add items from different restaurant")
+       }
+   
+       c.RestaurantID = restaurantID
        c.Items = append(c.Items, item)
        c.CalculateTotal()
+       return nil
    }
    
    // ลบสินค้าออกจากตะกร้า
@@ -373,6 +381,7 @@ CS362-G7-FoodDelivery/
    func (c *Cart) Clear() {
        c.Items = []OrderItem{}
        c.TotalPrice = 0
+       c.RestaurantID = 0
    }
 ```
 - **CalculateTotal()** ใช้คำนวณราคารวมของสินค้าในตะกร้าจาก OrderItem ทั้งหมด เพื่อให้ได้ราคารวมล่าสุดก่อนแสดงผลหรือสร้างคำสั่งซื้อ
@@ -431,6 +440,7 @@ CS362-G7-FoodDelivery/
    type OrderItem struct {
        OrderItemID         int
        FoodItemID          int
+       FoodName            string
        Quantity            int
        UnitPrice           int
        SpecialInstructions string
@@ -484,3 +494,24 @@ CS362-G7-FoodDelivery/
    }
 ```
 - **IsValid()** ใช้ตรวจสอบว่าข้อมูลร้านอาหารถูกต้อง เช่น มีชื่อร้านและตำแหน่งที่ตั้ง ก่อนใช้งานในระบบ
+
+### 6) FoodItem Entity Logic
+``` Go
+   type FoodItem struct {
+       FoodItemID   int
+       RestaurantID int
+       FoodName     string
+       Price        int
+       Description  string
+       IsAvailable  bool
+   }
+   
+   func (f *FoodItem) IsAvailableForOrder() bool {
+       return f.IsAvailable
+   }
+   
+   func (f *FoodItem) IsValid() bool {
+       return f.FoodName != "" && f.Price >= 0
+   }
+```
+
