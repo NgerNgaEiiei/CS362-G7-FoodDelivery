@@ -19,6 +19,7 @@
 | RestaurantID (PK) | Integer | รหัสร้านอาหาร | 
 | RestaurantName | String | ชื่อร้านอาหาร | 
 | RestaurantLocation | Geo | ที่ตั้งของร้าน | 
+| RestaurantPhone | String | เบอร์โทรร้าน | 
 
 > **หมายเหตุ:** `Geo` คือ ชนิดข้อมูลที่ใช้สำหรับเก็บ "พิกัดทางภูมิศาสตร์" เพื่อใช้คำนวณระยะทางจัดส่ง
 
@@ -28,10 +29,13 @@
 | OrderID (PK) | Integer | รหัสคำสั่งซื้อ | 
 | CustomerID (FK) | Integer | อ้างอิงถึงลูกค้า | 
 | RestaurantID (FK)| Integer | อ้างอิงถึงร้านอาหาร | 
-| OrderDate | DATE | วันที่ที่ทำการสั่งอาหาร | 
+| RiderID (FK)| Integer | อ้างอิงถึงไรเดอร์ | 
 | TotalPrice | Integer | ราคารวมทั้งหมดในการสั่งซื้อ | 
 | Status | String | สถานะของการสั่งซื้อ | 
-| DeliveryAddr | Geo | ที่อยู่จัดส่งของลูกค้า | 
+| DeliveryAddress | Geo | ที่อยู่จัดส่งของลูกค้า | 
+| CreatedAt | TIMESTAMP | วันที่ที่ทำการสั่งอาหาร | 
+| CustomerGracePeriodEnd | TIMESTAMP | deadline ที่ลูกค้ายังยกเลิกได้ หลังเวลานี้ยกเลิกไม่ได้แล้ว | 
+| RestaurantGracePeriodEnd | TIMESTAMP | deadline ที่ร้านยังปฏิเสธออเดอร์ได้ ประมาณ 10 วินาทีหลังรับออเดอร์ | 
 
 #### OrderItem
 | Attribute | Type | Description | 
