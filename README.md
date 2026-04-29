@@ -68,20 +68,25 @@
 ### Layered Architecture
 
 #### Controller Layer
-* `RestaurantController`
-* `OrderController`
 * `CartController`
+* `OrderController`
+* `MenuController`
+* `RiderController`
     
 #### Service Layer
-* `OrderService`
 * `CartService`
-* `RestaurantService`
+* `OrderService`
+* `MenuService`
+* `RiderService`
+* `RiderAssignmentService`
+* `NotificationService`
    
 #### Repository Layer
-* `OrderRepository`
-* `RestaurantRepository`
 * `CartRepository`
+* `OrderRepository`
 * `MenuRepository`
+* `RestaurantRepository`
+* `RiderRepository`
 
 ---
 
@@ -90,16 +95,24 @@
 CS362-G7-FoodDelivery/
 ├── controllers/
 │   ├── cart_controller.go
-│   └── order_controller.go
+│   ├── order_controller.go
+│   ├── menu_controller.go
+│   └── rider_controller.go
 │
 ├── services/
 │   ├── cart_service.go
-│   └── order_service.go
+│   ├── order_service.go
+│   ├── menu_service.go
+│   ├── rider_service.go
+│   ├── rider_assignment_service.go
+│   └── notification_service.go
 │
 ├── repositories/
 │   ├── cart_repository.go
 │   ├── order_repository.go
-│   └── fooditem_repository.go
+│   ├── menu_repository.go
+│   ├── restaurant_repository.go
+│   └── rider_repository.go
 │
 ├── models/
 │   ├── cart.go
@@ -108,9 +121,12 @@ CS362-G7-FoodDelivery/
 │   ├── customer.go
 │   ├── restaurant.go
 │   ├── food_item.go
+│   ├── rider.go
+│   ├── assignment.go
+│   ├── notification.go
 │   └── geo.go
 │
-├── README.md  
+└── README.md 
 ```
 
 ## Step 3: Interface & Controller Contract
