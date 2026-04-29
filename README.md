@@ -18,43 +18,19 @@
 | :--- | :--- | :--- | 
 | RestaurantID (PK) | Integer | รหัสร้านอาหาร | 
 | RestaurantName | String | ชื่อร้านอาหาร | 
-| RestaurantLocation | Geo | ที่ตั้งของร้าน | 
 | RestaurantPhone | String | เบอร์โทรร้าน | 
+| RestaurantLocation | Geo | ที่ตั้งของร้าน | 
 
 > **หมายเหตุ:** `Geo` คือ ชนิดข้อมูลที่ใช้สำหรับเก็บ "พิกัดทางภูมิศาสตร์" เพื่อใช้คำนวณระยะทางจัดส่ง
 
-#### Order
+#### Rider
 | Attribute | Type | Description | 
 | :--- | :--- | :--- | 
-| OrderID (PK) | Integer | รหัสคำสั่งซื้อ | 
-| CustomerID (FK) | Integer | อ้างอิงถึงลูกค้า | 
-| RestaurantID (FK)| Integer | อ้างอิงถึงร้านอาหาร | 
-| RiderID (FK)| Integer | อ้างอิงถึงไรเดอร์ | 
-| TotalPrice | Integer | ราคารวมทั้งหมดในการสั่งซื้อ | 
-| Status | String | สถานะของการสั่งซื้อ | 
-| DeliveryAddress | Geo | ที่อยู่จัดส่งของลูกค้า | 
-| CreatedAt | TIMESTAMP | วันที่ที่ทำการสั่งอาหาร | 
-| CustomerGracePeriodEnd | TIMESTAMP | deadline ที่ลูกค้ายังยกเลิกได้ หลังเวลานี้ยกเลิกไม่ได้แล้ว | 
-| RestaurantGracePeriodEnd | TIMESTAMP | deadline ที่ร้านยังปฏิเสธออเดอร์ได้ ประมาณ 10 วินาทีหลังรับออเดอร์ | 
-
-#### OrderItem
-| Attribute | Type | Description | 
-| :--- | :--- | :--- | 
-| OrderItemID (PK) | Integer | id ของรายการอาหารนั้น ๆ | 
-| OrderID (FK) | Integer | อ้างอิงถึงคำสั่งซื้อ | 
-| FoodItemID (FK) | Integer | อ้างอิงเมนูอาหาร |
-| quantity | Integer | จำนวนของรายการอาหารที่สั่ง | 
-| subTotal | Integer | ราคารวมย่อยของแต่ละรายการอาหาร | 
-| specialInstructions | Text | รายละเอียดเพิ่มเติม | 
-
-#### Cart
-| Attribute | Type | Description | 
-| :--- | :--- | :--- | 
-| CartID (PK) | Integer | รหัสตะกร้า | 
-| CustomerID (FK) | Integer | อ้างอิงถึงลูกค้าเจ้าของตะกร้า | 
-| RestaurantID (FK) | Integer | รหัสร้านอาหาร | 
-| TotalPrice | Integer | ราคารวมของตะกร้า | 
-| UpdatedAt | Timestamp | เวลาที่ตะกร้าถูกอัปเดตล่าสุด |
+| RiderID (PK) | Integer | รหัสไรเดอร์ | 
+| RiderName | String | ชื่อไรเดอร์ | 
+| RiderPhone | VARCHAR | เบอร์โทรไรเดอร์ | 
+| CurrentLocation | Geo | พิกัดปัจจุบันของไรเดอร์ ใช้จับคู่กับออเดอร์ที่ใกล้ที่สุด |
+| Status | VARCHAR | สถานะ: AVAILABLE / BUSY / SELECTED / GOING_OFFLINE / OFFLINE |
 
 #### FoodItem (Menu)
 | Attribute | Type | Description |
@@ -65,7 +41,46 @@
 | Price | Integer | ราคา |
 | Description | Text | รายละเอียด |
 | IsAvailable | Boolean | สถานะว่ายังขายอยู่ไหม |
----
+
+#### Cart
+| Attribute | Type | Description | 
+| :--- | :--- | :--- | 
+| CartID (PK) | Integer | รหัสตะกร้า | 
+| CustomerID (FK) | Integer | อ้างอิงถึงลูกค้าเจ้าของตะกร้า | 
+| RestaurantID (FK) | Integer | อ้างอิงร้านอาหาร ใช้ validate ว่า item ทุกอันมาจากร้านเดียวกัน | 
+| UpdatedAt | Timestamp | เวลาที่ตะกร้าถูกอัปเดตล่าสุด |
+
+#### CartItem
+| Attribute | Type | Description | 
+| :--- | :--- | :--- | 
+| CartItemID (PK) | Integer | รหัสรายการอาหารในตะกร้า | 
+| CartID (FK) | Integer | อ้างอิงถึงตะกร้า | 
+| FoodItemID (FK) | Integer | อ้างอิงเมนูอาหาร | 
+| Quantity | Integer | จำนวนที่สั่ง เปลี่ยนได้ตลอดก่อนกด checkout | 
+
+#### Order
+| Attribute | Type | Description | 
+| :--- | :--- | :--- | 
+| OrderID (PK) | Integer | รหัสคำสั่งซื้อ | 
+| CustomerID (FK) | Integer | อ้างอิงถึงลูกค้า | 
+| RestaurantID (FK) | Integer | อ้างอิงถึงร้านอาหาร | 
+| RiderID (FK) | Integer | อ้างอิงถึงไรเดอร์ (NULL ได้ถ้าระบบยังหา rider ไม่เจอ) | 
+| Status | VARCHAR | สถานะของการสั่งซื้อ | 
+| TotalPrice | Integer | ราคารวมทั้งหมด snapshot ไว้ตอนสั่ง | 
+| DeliveryAddress | Geo | ที่อยู่จัดส่ง อาจไม่ใช่บ้านลูกค้าก็ได้ | 
+| CreatedAt | TIMESTAMP | เวลาที่กด confirm ออเดอร์ | 
+| CustomerGracePeriodEnd | TIMESTAMP | deadline ที่ลูกค้ายังยกเลิกได้ หลังเวลานี้ยกเลิกไม่ได้แล้ว | 
+| RestaurantGracePeriodEnd | TIMESTAMP | deadline ที่ร้านยังปฏิเสธออเดอร์ได้ ประมาณ 10 วินาทีหลังรับออเดอร์ | 
+
+#### OrderItem
+| Attribute | Type | Description | 
+| :--- | :--- | :--- | 
+| OrderItemID (PK) | Integer | รหัสรายการอาหารในออเดอร์ | 
+| OrderID (FK) | Integer | อ้างอิงถึงคำสั่งซื้อ | 
+| FoodItemID (FK) | Integer | อ้างอิงเมนูอาหาร |
+| Quantity | Integer | จำนวนที่สั่ง | 
+| Subtotal | Integer | ราคา ณ ตอนสั่ง × quantity ไม่เปลี่ยนแม้ร้านจะแก้ราคาทีหลัง | 
+| SpecialInstructions | Text | คำขอพิเศษเฉพาะ item นี้ เช่น "ไม่เอาผัก", "เผ็ดน้อย" |
 
 ## Step 2: Architectural Mapping
 
