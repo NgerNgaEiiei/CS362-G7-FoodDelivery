@@ -130,404 +130,219 @@ CS362-G7-FoodDelivery/
 ```
 
 ## Step 3: Interface & Controller Contract
-### Task 1: Controller (API Specification)
-### 1) Add Item to Cart
-- **Endpoint:** `POST /cart/items`
-- **Description:** เพิ่มรายการอาหารลงในตะกร้าของลูกค้า
-
-#### Request Body
-```json
-{
-  "customerId": 1,
-  "foodItemId": 101,
-  "quantity": 2,
-  "specialInstructions": "ไม่ใส่ผัก"
+### Cart Service
+#### Interface
+```go
+type CartService interface {
+    AddItem(userID string, item CartItem) error
+    RemoveItem(userID string, foodItemID string) error
+    UpdateQuantity(userID string, foodItemID string, quantity int) error
+    GetCart(userID string) (*Cart, error)
+    ClearCart(userID string) error
+}
+ 
+type CartRepository interface {
+    Save(cart *Cart) error
+    FindByUserID(userID string) (*Cart, error)
+    DeleteByUserID(userID string) error
 }
 ```
 
-#### Success Response
-```json
-{
-  "message": "Item added to cart successfully",
-  "cartId": 5001,
-  "item": {
-    "foodItemId": 101,
-    "quantity": 2,
-    "unitPrice": 60,
-    "specialInstructions": "ไม่ใส่ผัก"
-  }
-}
+#### Controller Contract
 ```
-
-#### Error Response
-```json
-{
-  "message": "Food item not found"
-}
+GET    /cart
+  Response: { "cart_id": "abc", "items": [...], "total": 150.00 }
+ 
+POST   /cart/items
+  Request:  { "food_item_id": "123", "quantity": 2 }
+  Response: { "cart_id": "abc", "total": 150.00 }
+ 
+PUT    /cart/items/:food_item_id
+  Request:  { "quantity": 3 }
+  Response: { "cart_id": "abc", "total": 225.00 }
+ 
+DELETE /cart/items/:food_item_id
+  Response: { "message": "item removed" }
+ 
+DELETE /cart
+  Response: { "message": "cart cleared" }
 ```
 
 ---
 
-### 2) Get Cart by Customer
-- **Endpoint:** `GET /cart/{customerId}`
-- **Description:** ดูรายการอาหารทั้งหมดในตะกร้าของลูกค้า
+### Order Service
 
-#### Success Response
-```json
-{
-  "cartId": 5001,
-  "customerId": 1,
-  "items": [
-    {
-      "orderItemId": 1,
-      "foodItemId": 101,
-      "foodName": "ข้าวผัดกุ้ง",
-      "quantity": 2,
-      "unitPrice": 60,
-      "subTotal": 120,
-      "specialInstructions": "ไม่ใส่ผัก"
-    }
-  ],
-  "totalPrice": 120
+#### Interface
+```go
+type OrderService interface {
+    CreateOrder(userID string, cartID string) (*Order, error)
+    GetOrder(orderID string) (*Order, error)
+    GetOrdersByUser(userID string) ([]*Order, error)
+    CancelOrder(orderID string) error
+    UpdateOrderStatus(orderID string, status OrderStatus) error
+}
+ 
+type OrderRepository interface {
+    Save(order *Order) error
+    FindByID(orderID string) (*Order, error)
+    FindByUserID(userID string) ([]*Order, error)
+    UpdateStatus(orderID string, status OrderStatus) error
 }
 ```
 
-#### Error Response
-```json
-{
-  "message": "Cart not found"
-}
+#### Controller Contrct
+```
+POST   /orders
+  Request:  { "cart_id": "abc", "address": "123 Main St" }
+  Response: { "order_id": "xyz", "status": "pending", "total": 150.00 }
+ 
+GET    /orders/:order_id
+  Response: { "order_id": "xyz", "status": "delivering", "items": [...] }
+ 
+GET    /orders
+  Response: [ { "order_id": "xyz", "status": "completed", ... }, ... ]
+ 
+DELETE /orders/:order_id
+  Response: { "message": "order cancelled" }
 ```
 
 ---
 
-### 3) Update Cart Item
-- **Endpoint:** `PUT /cart/items/{orderItemId}`
-- **Description:** แก้ไขจำนวนหรือรายละเอียดเพิ่มเติมของรายการอาหารในตะกร้า
+### Menu / Restaurant Service
 
-#### Request Body
-```json
-{
-  "quantity": 3,
-  "specialInstructions": "เผ็ดน้อย"
+#### Interface
+```go
+type MenuService interface {
+    GetRestaurants() ([]*Restaurant, error)
+    GetRestaurantByID(restaurantID string) (*Restaurant, error)
+    GetMenuByRestaurant(restaurantID string) ([]*MenuItem, error)
+    AddMenuItem(restaurantID string, item MenuItem) error
+    UpdateMenuItem(itemID string, item MenuItem) error
+    DeleteMenuItem(itemID string) error
+}
+ 
+type MenuRepository interface {
+    FindAllRestaurants() ([]*Restaurant, error)
+    FindRestaurantByID(restaurantID string) (*Restaurant, error)
+    FindMenuByRestaurantID(restaurantID string) ([]*MenuItem, error)
+    SaveMenuItem(item *MenuItem) error
+    UpdateMenuItem(item *MenuItem) error
+    DeleteMenuItem(itemID string) error
 }
 ```
 
-#### Success Response
-```json
-{
-  "message": "Cart item updated successfully"
-}
+#### Controller Contract
 ```
-
-#### Error Response
-```json
-{
-  "message": "Cart item not found"
-}
+GET    /restaurants
+  Response: [ { "restaurant_id": "r1", "name": "...", "rating": 4.5 }, ... ]
+ 
+GET    /restaurants/:restaurant_id
+  Response: { "restaurant_id": "r1", "name": "...", "menu": [...] }
+ 
+GET    /restaurants/:restaurant_id/menu
+  Response: [ { "item_id": "m1", "name": "...", "price": 80.00 }, ... ]
+ 
+POST   /restaurants/:restaurant_id/menu
+  Request:  { "name": "Pad Thai", "price": 80.00, "category": "main" }
+  Response: { "item_id": "m1", "name": "Pad Thai", "price": 80.00 }
+ 
+PUT    /restaurants/:restaurant_id/menu/:item_id
+  Request:  { "price": 90.00 }
+  Response: { "item_id": "m1", "price": 90.00 }
+ 
+DELETE /restaurants/:restaurant_id/menu/:item_id
+  Response: { "message": "item deleted" }
 ```
-
+ 
 ---
 
-### 4) Remove Cart Item
-- **Endpoint:** `DELETE /cart/items/{orderItemId}`
-- **Description:** ลบรายการอาหารออกจากตะกร้า
+### Rider Service
 
-#### Success Response
-```json
-{
-  "message": "Cart item removed successfully"
+#### Interface
+```go
+type RiderService interface {
+    GetRiderByID(riderID string) (*Rider, error)
+    UpdateLocation(riderID string, lat float64, lng float64) error
+    SetAvailability(riderID string, available bool) error
+    GetActiveOrders(riderID string) ([]*Order, error)
+    UpdateOrderStatus(riderID string, orderID string, status OrderStatus) error
+}
+ 
+type RiderRepository interface {
+    FindByID(riderID string) (*Rider, error)
+    UpdateLocation(riderID string, lat float64, lng float64) error
+    UpdateAvailability(riderID string, available bool) error
+    FindActiveOrdersByRiderID(riderID string) ([]*Order, error)
 }
 ```
 
-#### Error Response
-```json
-{
-  "message": "Cart item not found"
-}
+#### Controller Contract
 ```
-
+GET    /riders/:rider_id
+  Response: { "rider_id": "r1", "name": "...", "available": true }
+ 
+PUT    /riders/:rider_id/location
+  Request:  { "lat": 13.7563, "lng": 100.5018 }
+  Response: { "message": "location updated" }
+ 
+PUT    /riders/:rider_id/availability
+  Request:  { "available": true }
+  Response: { "message": "availability updated" }
+ 
+GET    /riders/:rider_id/orders
+  Response: [ { "order_id": "xyz", "status": "picking_up", ... }, ... ]
+ 
+PUT    /riders/:rider_id/orders/:order_id/status
+  Request:  { "status": "delivered" }
+  Response: { "message": "status updated" }
+```
+ 
 ---
 
-### 5) Create Order
-- **Endpoint:** `POST /orders`
-- **Description:** ยืนยันคำสั่งซื้อจากรายการในตะกร้าของลูกค้า
-
-#### Request Body
-```json
-{
-  "customerId": 1,
-  "restaurantId": 10,
-  "deliveryAddr": {
-     "lat": 14.064,
-     "lng": 100.608,
-     "address": "89/12 Khlong Luang, Pathum Thani"
-   }
+### Rider Assignment Service
+#### Interface
+```go
+type RiderAssignmentService interface {
+    AssignRider(order *Order) (*Assignment, error)
+    FindNearestRider(lat float64, lng float64) (*Rider, error)
+    IsRiderAvailable(riderID string) (bool, error)
+    ReleaseRider(riderID string, orderID string) error
 }
 ```
-
-#### Success Response
-```json
-{
-  "message": "Order created successfully",
-  "orderId": 9001,
-  "status": "PENDING",
-  "totalPrice": 120
-}
+ 
+#### Event Contract
 ```
-
-#### Error Response
-```json
-{
-  "message": "Cart is empty"
-}
+Consumes: order.created
+  Payload: { "order_id": "xyz", "restaurant_lat": 13.75, "restaurant_lng": 100.50 }
+ 
+Publishes: rider.assigned
+  Payload: { "order_id": "xyz", "rider_id": "r1", "estimated_pickup": "10min" }
 ```
-
+ 
 ---
 
-### 6) Get Order Detail
-- **Endpoint:** `GET /orders/{orderId}`
-- **Description:** ดูรายละเอียดคำสั่งซื้อที่ถูกสร้างแล้ว
+### Notification Service
+> ทำงานแบบ async ผ่าน Kafka — ไม่มี HTTP endpoint
 
-#### Success Response
-```json
-{
-  "orderId": 9001,
-  "orderDate": "2026-03-19",
-  "customerId": 1,
-  "restaurantId": 10,
-  "status": "PENDING",
-  "deliveryAddr": {
-    "lat": 14.064,
-    "lng": 100.608,
-    "address": "89/12 Khlong Luang, Pathum Thani"
-  },
-  "items": [
-    {
-      "orderItemId": 1,
-      "foodItemId": 101,
-      "foodName": "ข้าวผัดกุ้ง",
-      "quantity": 2,
-      "subTotal": 120,
-      "specialInstructions": "ไม่ใส่ผัก"
-    }
-  ],
-  "totalPrice": 120
+#### Interface
+```go
+type NotificationService interface {
+    SendPushNotification(userID string, message Notification) error
+    NotifyCustomer(orderID string, event string) error
+    NotifyRestaurant(orderID string, event string) error
+    NotifyRider(riderID string, event string) error
 }
 ```
-
-#### Error Response
-```json
-{
-  "message": "Order not found"
-}
+ 
+#### Event Contract
 ```
-### Task 2: Interface
-### 1) CartService Interface
-- **Description:** จัดการตะกร้าสินค้าของลูกค้า (เพิ่ม, แก้ไข, ลบ, ดูรายการ)
-``` Go
-   type CartService interface {
-    AddItemToCart(customerID int, foodItemID int, quantity int, specialInstructions string) (Cart, error)
-    GetCartByCustomer(customerID int) (Cart, error)
-    UpdateCartItem(orderItemID int, quantity int, specialInstructions string) error
-    RemoveCartItem(orderItemID int) error
-}
-```
-
-### 2) Order Service Interface
-- **Description:** จัดการคำสั่งซื้อ (สร้างคำสั่งซื้อ และดูรายละเอียดคำสั่งซื้อ)
-``` Go
-   type OrderService interface {
-    CreateOrder(customerID int, restaurantID int, deliveryAddr Geo) (Order, error)
-    GetOrderDetail(orderID int) (Order, error)
-}
-```
-
-### Task 3: Refinement (Entity Logic)
-### 1) Cart Entity Logic
-``` Go
-   type Cart struct {
-       CartID     int
-       CustomerID int
-       RestaurantID int
-       Items      []OrderItem
-       TotalPrice int
-       UpdatedAt time.Time
-   }
-   
-   // คำนวณราคารวมของตะกร้า
-   func (c *Cart) CalculateTotal() {
-       total := 0
-       for _, item := range c.Items {
-           total += item.CalculateSubTotal()
-       }
-       c.TotalPrice = total
-   }
-   
-   // ตรวจสอบว่าตะกร้าว่างหรือไม่
-   func (c *Cart) IsEmpty() bool {
-       return len(c.Items) == 0
-   }
-   
-   // เพิ่มสินค้าในตะกร้า
-   func (c *Cart) AddItem(item OrderItem, restaurantID int) error {
-       if c.RestaurantID != 0 && c.RestaurantID != restaurantID {
-           return errors.New("cannot add items from different restaurant")
-       }
-   
-       c.RestaurantID = restaurantID
-       c.Items = append(c.Items, item)
-       c.CalculateTotal()
-       return nil
-   }
-   
-   // ลบสินค้าออกจากตะกร้า
-   func (c *Cart) RemoveItem(orderItemID int) {
-       newItems := []OrderItem{}
-       for _, item := range c.Items {
-           if item.OrderItemID != orderItemID {
-               newItems = append(newItems, item)
-           }
-       }
-       c.Items = newItems
-       c.CalculateTotal()
-   }
-   
-   // ล้างตะกร้า
-   func (c *Cart) Clear() {
-       c.Items = []OrderItem{}
-       c.TotalPrice = 0
-       c.RestaurantID = 0
-   }
-```
-- **CalculateTotal()** ใช้คำนวณราคารวมของสินค้าในตะกร้าจาก OrderItem ทั้งหมด เพื่อให้ได้ราคารวมล่าสุดก่อนแสดงผลหรือสร้างคำสั่งซื้อ
-- **IsEmpty()** ใช้ตรวจสอบว่าตะกร้าว่างหรือไม่ เพื่อป้องกันการสร้างคำสั่งซื้อจากตะกร้าที่ไม่มีสินค้า
-- **AddItem()** → เพิ่มสินค้า (logic หลักของ cart)
-- **RemoveItem()** → ลบสินค้า
-- **Clear()** → เคลียร์ตะกร้าหลัง checkout
-
-### 2) Order Entity Logic
-``` Go
-   type Order struct {
-       OrderID      int
-       OrderDate    time.Time
-       CustomerID   int
-       RestaurantID int
-       Status       string
-       DeliveryAddr Geo
-       Items        []OrderItem
-       TotalPrice   int
-   }
-   
-   // คำนวณราคารวมของคำสั่งซื้อ
-   func (o *Order) CalculateTotal() {
-       total := 0
-       for _, item := range o.Items {
-           total += item.CalculateSubTotal()
-       }
-       o.TotalPrice = total
-   }
-   
-   // ตรวจสอบความถูกต้องของคำสั่งซื้อ
-   func (o *Order) IsValid() bool {
-       return o.CustomerID > 0 &&
-              o.RestaurantID > 0 &&
-              len(o.Items) > 0
-   }
-   
-   // อัปเดตสถานะคำสั่งซื้อ
-   func (o *Order) UpdateStatus(status string) {
-       o.Status = status
-   }
-   
-   // ตรวจสอบว่าสั่งซื้อเสร็จสมบูรณ์หรือไม่
-   func (o *Order) IsCompleted() bool {
-       return o.Status == "COMPLETED"
-   }
-   
-```
-- **CalculateTotal()** ใช้คำนวณราคารวมของคำสั่งซื้อจากรายการอาหารทั้งหมดใน Order
-- **IsValid()** ใช้ตรวจสอบว่าข้อมูลคำสั่งซื้อครบถ้วน เช่น มีลูกค้า ร้านอาหาร และรายการอาหาร ก่อนบันทึกลงระบบ
-- **UpdateStatus()** → เปลี่ยนสถานะ (สำคัญมากในระบบจริง)
-- **IsCompleted()** → ใช้เช็ค flow หลังส่งอาหาร
-
-### 3) OrderItem Entity Logic
-``` Go
-   type OrderItem struct {
-       OrderItemID         int
-       FoodItemID          int
-       FoodName            string
-       Quantity            int
-       UnitPrice           int
-       SpecialInstructions string
-   }
-   
-   // คำนวณราคาย่อยของแต่ละรายการ
-   func (oi *OrderItem) CalculateSubTotal() int {
-       return oi.UnitPrice * oi.Quantity
-   }
-   
-   // ตรวจสอบข้อมูลรายการอาหาร
-   func (oi *OrderItem) IsValid() bool {
-       return oi.Quantity > 0 && oi.UnitPrice >= 0
-   }
-```
-- **CalculateSubTotal()** ใช้คำนวณราคารวมย่อยของแต่ละรายการอาหารจากจำนวนและราคาต่อหน่วย
-- **IsValid()** ใช้ตรวจสอบความถูกต้องของข้อมูล เช่น จำนวนต้องมากกว่า 0 และราคาต้องไม่ติดลบ
-
-### 4) Customer Entity Logic
-``` Go
-   type Customer struct {
-       CustomerID      int
-       CustomerName    string
-       CustomerPhone   string
-       CustomerAddress Geo
-   }
-   
-   // ตรวจสอบข้อมูลลูกค้า
-   func (c *Customer) IsValid() bool {
-       return c.CustomerName != "" &&
-              c.CustomerPhone != "" &&
-              c.CustomerAddress.Lat != 0 &&
-              c.CustomerAddress.Lng != 0
-   }
-```
-- **IsValid()** ใช้ตรวจสอบว่าข้อมูลลูกค้ามีความครบถ้วน เช่น ชื่อ เบอร์โทร และที่อยู่ ก่อนนำไปใช้งานในระบบ
-
-### 5) Restaurant Entity Logic
-``` Go
-   type Restaurant struct {
-       RestaurantID       int
-       RestaurantName     string
-       RestaurantLocation Geo
-   }
-   
-   // ตรวจสอบข้อมูลร้านอาหาร
-   func (r *Restaurant) IsValid() bool {
-       return r.RestaurantName != "" &&
-              r.RestaurantLocation.Lat != 0 &&
-              r.RestaurantLocation.Lng != 0
-   }
-```
-- **IsValid()** ใช้ตรวจสอบว่าข้อมูลร้านอาหารถูกต้อง เช่น มีชื่อร้านและตำแหน่งที่ตั้ง ก่อนใช้งานในระบบ
-
-### 6) FoodItem Entity Logic
-``` Go
-   type FoodItem struct {
-       FoodItemID   int
-       RestaurantID int
-       FoodName     string
-       Price        int
-       Description  string
-       IsAvailable  bool
-   }
-   
-   func (f *FoodItem) IsAvailableForOrder() bool {
-       return f.IsAvailable
-   }
-   
-   func (f *FoodItem) IsValid() bool {
-       return f.FoodName != "" && f.Price >= 0
-   }
+Consumes: rider.assigned
+  Action: แจ้ง rider ว่ามีงานใหม่
+ 
+Consumes: order.status_updated
+  Action: แจ้ง customer ว่า order status เปลี่ยน
+ 
+Consumes: restaurant.refused
+  Action: แจ้ง customer ว่าร้านปฏิเสธ order
 ```
 
